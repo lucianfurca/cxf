@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>cxf-bom</artifactId>
     <name>Apache CXF BOM</name>
-    <version>3.5.11-fix-CXF-9007</version>
+    <version>3.5.11-fix-CXF-9007-PR3159-3425-3430</version>
     <description>Apache CXF Build of Materials POM</description>
     <packaging>pom</packaging>
     <dependencyManagement>
@@ -38,7 +38,7 @@
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-core</artifactId>
-                <version>3.5.11-fix-CXF-9007</version>
+                <version>3.5.11-fix-CXF-9007-PR3159-3425-3430</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>

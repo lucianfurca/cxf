@@ -20,7 +20,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>cxf-core</artifactId>
-    <version>3.5.11-fix-CXF-9007</version>
+    <version>3.5.11-fix-CXF-9007-PR3159-3425-3430</version>
     <packaging>jar</packaging>
     <name>Apache CXF Core</name>
     <description>Apache CXF Core</description>

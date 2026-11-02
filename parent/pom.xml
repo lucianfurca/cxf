@@ -25,7 +25,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>cxf-parent</artifactId>
-    <version>3.5.11-fix-CXF-9007</version>
+    <version>3.5.11-fix-CXF-9007-PR3159-3425-3430</version>
     <name>Apache CXF Parent</name>
     <description>Apache CXF Parent POM</description>
     <url>https://cxf.apache.org</url>

@@ -78,6 +78,14 @@ public class AttachmentDeserializer {
     public static final int DEFAULT_MAX_HEADER_SIZE =
         SystemPropertyAction.getInteger("org.apache.cxf.attachment-max-header-size", 300);
 
+    /**
+     * The maximum number of headers permitted in a single attachment part. The default is 500.
+     * Backport of the CVE-2026-50645 fix from Apache CXF 3.6.12 / 4.1.7 / 4.2.2.
+     */
+    public static final String ATTACHMENT_HEADERS_MAX_COUNT = "attachment-headers-max-count";
+    public static final int DEFAULT_ATTACHMENT_HEADERS_MAX_COUNT =
+        SystemPropertyAction.getInteger("org.apache.cxf.attachment-max-headers-count", 500);
+
     public static final int THRESHOLD = 1024 * 100; //100K (byte unit)
 
     private static final Pattern CONTENT_TYPE_BOUNDARY_PATTERN = Pattern.compile("boundary=\"?([^\";]*)");
@@ -108,6 +116,7 @@ public class AttachmentDeserializer {
     private List<String> supportedTypes;
 
     private int maxHeaderLength = DEFAULT_MAX_HEADER_SIZE;
+    private int maxHeadersCount = DEFAULT_ATTACHMENT_HEADERS_MAX_COUNT;
 
     public AttachmentDeserializer(Message message) {
         this(message, Collections.singletonList("multipart/related"));
@@ -120,6 +129,9 @@ public class AttachmentDeserializer {
         // Get the maximum Header length from configuration
         maxHeaderLength = MessageUtils.getContextualInteger(message, ATTACHMENT_MAX_HEADER_SIZE,
                                                             DEFAULT_MAX_HEADER_SIZE);
+        // Get the maximum number of headers per attachment part from configuration
+        maxHeadersCount = MessageUtils.getContextualInteger(message, ATTACHMENT_HEADERS_MAX_COUNT,
+                                                            DEFAULT_ATTACHMENT_HEADERS_MAX_COUNT);
     }
 
     public void initializeAttachments() throws IOException {
@@ -372,6 +384,7 @@ public class AttachmentDeserializer {
         StringBuilder buffer = new StringBuilder(128);
         StringBuilder b = new StringBuilder(128);
         Map<String, List<String>> heads = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        int headersCount = 0;
 
         // loop until we hit the end or a null line
         while (readLine(in, b)) {
@@ -386,6 +399,7 @@ public class AttachmentDeserializer {
             } else {
                 // if we have a line pending in the buffer, flush it
                 if (buffer.length() > 0) {
+                    checkHeadersCount(++headersCount);
                     addHeaderLine(heads, buffer);
                     buffer.setLength(0);
                 }
@@ -396,9 +410,18 @@ public class AttachmentDeserializer {
 
         // if we have a line pending in the buffer, flush it
         if (buffer.length() > 0) {
+            checkHeadersCount(++headersCount);
             addHeaderLine(heads, buffer);
         }
         return heads;
+    }
+
+    private void checkHeadersCount(int headersCount) throws IOException {
+        // Counts every header line (including repeated names), not only distinct names
+        if (headersCount > maxHeadersCount) {
+            LOG.fine("The attachment headers count has exceeded the configured parameter: " + maxHeadersCount);
+            throw new IOException("The attachment contains more headers than are permitted");
+        }
     }
 
     private boolean readLine(InputStream in, StringBuilder buffer) throws IOException {
